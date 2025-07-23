@@ -22,59 +22,40 @@ import scripts.storage_services as storage_services
 
 # Set these by year and project
 FILE_STRUCTURE = {
-    'HKZ': 'FLAT',
     'Kahuku': 'STANDARD',
     'Pattern': 'STANDARD',
-    'SkySpecs': 'FLAT',
-    'Great_Pathfinder': 'STANDARD',
     'West_OSC': 'STANDARD',
 }
 
 WIND_TYPE = {
-    'HKZ': 'Offshore',
     'Kahuku': 'Onshore',
     'Pattern': 'Onshore',
-    'SkySpecs': 'Onshore',
-    'Great_Pathfinder': 'Onshore',
     'West_OSC': 'Onshore'
 }
 
 LOCATIONS = {
     'Pattern': ['Clines_Corners', 'Duran_Mesa', 'Gulf_Wind', 'Hatchet_Ridge','Henvey_Inlet',
                 'Lanfine', 'Logans_Gap', 'Red_Cloud', 'Santa_Isabel', 'Stillwater', 'Tecolote'],
-    'Great_Pathfinder': ['3D_Test_Videos'],
     'West_OSC': ['Cardinal_Point', 'Bright_Stalk', 'Wildhorse_Mountain']
 }
 
 CURRENT_YEAR = '2025'
 
 DATA_BASE_SHORTCUTS = {
-    'HKZ': '.shortcut-targets-by-id/1CVEKMNfuN-Q7S5RGO2AI1lW9pXx7d7eQ',
     'Core': '.shortcut-targets-by-id/1vqGfsolivsfb3uonHK-cV02VRW_pS7DX',
 }
 
 PROJECT_RANGES = {
-    'HKZ': (270, 290),
     'Kahuku': (150, 170),
     'Pattern': (150, 170),
-    'SkySpecs': (85, 95),
-    'Great_Pathfinder': (150, 170),
     'West_OSC': (150, 170),
 }
 
 INPUT_STORAGE_SERVICE = {
-    'HKZ': 'local',
     'Kahuku': 'local',
     'Pattern': 'local',
-    'SkySpecs': 'local',
-    'Great_Pathfinder': 'local',
     'West_OSC': 'azure'
 }
-
-# Set these by person and computer
-
-GITHUB_PATH = f"C:/Users/{os.getlogin()}/Documents/GitHub/"
-AZURE_SECRET_PATH = f"{GITHUB_PATH}notebooks/notebook_utility/azure_config.json"
 
 #}
 
@@ -110,30 +91,16 @@ class NotebookConfig:
         datapull. It sets the data base path, processing parameters path, and mkv base path.
         """
         # Set database path based on project and year
-        if self.project == 'HKZ':
-            self.data_base_path = Path(DRIVE_LETTER, DATA_BASE_SHORTCUTS['HKZ'], 
-                                       'HKZ Data').as_posix()
-        else:
-            self.data_base_path = Path(DRIVE_LETTER, DATA_BASE_SHORTCUTS['Core'], 
+        
+        self.data_base_path = Path(DRIVE_LETTER, DATA_BASE_SHORTCUTS['Core'], 
                                        f'{CURRENT_YEAR} Data/').as_posix()
             
         # Set the video base path
         if self.project == 'Pattern':
             self.video_base_path = Path(DRIVE_LETTER, f'.shortcut-targets-by-id/**/' \
                                         f'{self.location}/').as_posix()
-        elif self.project == 'HKZ':
-            self.video_base_path = Path(DRIVE_LETTER, '.shortcut-targets-by-id/**/', 
-                                        'HKZ Video').as_posix()
-        elif self.project == 'SkySpecs':
-            self.video_base_path = Path(DRIVE_LETTER, 'Shared Drives', 'SkySpecs Videos').as_posix()
         else:
             self.video_base_path = Path(DRIVE_LETTER, 'Shared Drives', self.project).as_posix()
-
-        # Set the processing parameters csv path
-        self.processing_params_csv = Path(
-            GITHUB_PATH, 'processing_parameters', 'Current Season', self.project,
-            f'{self.project}_Processing_Parameters.csv'
-        ).as_posix()
 
         # Set wildcard count for paths
         file_structure = FILE_STRUCTURE[self.project]
@@ -246,12 +213,6 @@ class NotebookConfig:
 
     def get_summary_images_path(self):
         return Path(self.get_detections_path(), '**', '**_Summary.jpg').as_posix()
-
-    def get_processing_params_csv(self):
-        return Path(
-            GITHUB_PATH, 'processing-parameters', 'Current Season', self.project,
-            f'{self.project}_Processing_Parameters.csv'
-        ).as_posix()
 
     def get_classified_dbs_path(self, turbine='**'):
         return Path(self.get_classified_path(), turbine, '**_Classified.db').as_posix()
