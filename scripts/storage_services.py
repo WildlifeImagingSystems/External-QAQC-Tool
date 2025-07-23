@@ -103,7 +103,7 @@ class AzureBlobStorageService(InputBase):
     def list_cam_ids(self):
         # check if video list is already defined        
         if self.video_list == None:
-            self.video_list = self.get_video_paths()
+            self.video_list = self.list_video_paths()
 
         camera_ids = []
         for video_path in self.video_list:
