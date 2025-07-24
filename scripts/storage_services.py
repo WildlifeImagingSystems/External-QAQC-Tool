@@ -129,11 +129,7 @@ class AzureBlobStorageService(InputBase):
     def list_xml_paths(self, camera_id=None):
         # check if xml list is already defined        
         if self.xml_list is None:
-            if camera_id:
-                prefix = f"{self.datapull_folder}/{camera_id}/"
-            else:
-                prefix = f"{self.datapull_folder}/"
-
+            prefix = f"{self.datapull_folder}/"
             blobs = self.blob_storage_client.list_blobs(name_starts_with=prefix)
             self.xml_list = [blob.name for blob in blobs if blob.name.endswith('.xml')]
                             
@@ -184,91 +180,3 @@ class AzureBlobStorageService(InputBase):
     def get_file_size(self, path):
         properties = self.blob_storage_client.get_blob_client(path).get_blob_properties()
         return properties.size  # Azure returns the size of a file in bytes
-
-
-class LocalStorageService(InputBase):
-    video_base_path = None
-    datapull = None
-
-    def __init__(self, video_base_path, datapull, video_search_path, xml_search_path):
-        """
-        Initializes an interface to interact with locally stored files.
-        
-        Args:
-            video_base_path: the base path where all of this datapulls videos are stored.
-            datapull: the datapull being accessed.
-            video_search_path: a path with wildcards (**) which can be used to list all videos.
-            xml_search_path: a path with wildcards (**) which can be used to list all xmls.
-        """
-        self.video_base_path = video_base_path
-        self.datapull = datapull
-        self.video_search_path = video_search_path
-        self.xml_search_path = xml_search_path
-
-        # initialize so that lists are only generated once
-        self.video_list = None
-        self.xml_list = None
-
-
-    """Data Access Methods"""
-    def list_cam_ids(self):
-        camera_id_pattern = f"{self.video_base_path}/{self.datapull}/**"
-        files = glob(camera_id_pattern)
-        camera_ids = [os.path.basename(folder) for folder in files if os.path.isdir(folder)]
-
-        # remove .ini files
-        camera_id_list = [camera_id for camera_id in set(camera_ids) if 'ini' not in camera_id]
-        return sorted(camera_id_list)
-
-    def list_video_paths(self, camera_id=None, file_ext='.mkv'):
-        if self.video_list is None:
-            files = glob(self.video_search_path)
-
-            self.video_list = [file for file in files if file.endswith(file_ext)]
-        
-        # only include videos from camera id if specified
-        if camera_id:
-            return [path for path in self.video_list if camera_id in path]
-
-        return self.video_list
-
-    def list_xml_paths(self,camera_id=None):
-        if self.xml_list is None:
-
-            files = glob(self.xml_search_path)
-
-            self.xml_list = [file for file in files if file.endswith('.xml')]
-
-        # only include xmls from camera id if specified
-        if camera_id:
-            return [path for path in self.xml_list if camera_id in path]
-
-        return self.xml_list
-
-    def list_mac_addresses(self):
-        mac_addresses = {}
-        for camera_id in self.list_cam_ids():
-            mac_addresses[camera_id] = {} 
-            mac_folders = glob(f"{self.video_base_path}/{self.datapull}/{camera_id}/**/**/**")
-            for folder in mac_folders:
-                if os.path.isdir(folder):
-                    path_paths = PurePath(folder).parts
-
-                    # parse path for date
-                    date = path_paths[-3]
-
-                    # parse path for mac address
-                    mac_folder_name = path_paths[-1]
-                    mac_address = mac_folder_name.split('_')[-1]
-                    if len(mac_address) == 12: #  mac addresses are always 12 characters long
-                        mac_addresses[camera_id][date] = mac_address
-
-        return mac_addresses
-
-    def get_file(self, path):
-        return path
-
-    def get_file_size(self, path):
-        return os.stat(path).st_size # file size is returned in bytes
-    
-

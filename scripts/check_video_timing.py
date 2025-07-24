@@ -33,10 +33,6 @@ def create_heatmap(count_detect_files_array, date_list, config, camera_ids):
 
 
 def create_video_timing_card(config):
-    zero_size_files = []
-    xml_count = 0
-    video_count = 0
-
     all_files = config.data_access.list_video_paths()
     camera_id_list = config.data_access.list_cam_ids()
 
@@ -62,19 +58,19 @@ def create_video_timing_card(config):
                 file_list = [path for path in camera_video_files if date_str in path]
                 count_detect_files_array[ind_camera_id,ind_date] = len(file_list)
                 xml_list = [path for path in camera_xml_files if date_str in path]
+                xml_list = [path for path in xml_list if 'recording' not in path]
                 count_xmls[ind_camera_id,ind_date] = len(xml_list)
 
-                # Check files for size
-                for file in file_list:
-                    file_size = config.data_access.get_file_size(file)
-                    if file_size == 0:
-                        zero_size_files.append(file)
-
-                xml_count += len(xml_list)
-                video_count += len(file_list)
+                xml_count = len(xml_list)
+                video_count = len(file_list)
                 if len(xml_list) != len(file_list):
-                    print(f'camera_id: {camera_id_list[ind_camera_id]}')
-                    print(f'date: {date_list[ind_date]}')
+                    print(f'date: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: mismatched count of xmls and videos.')
+
+                if xml_count == 0 and video_count != 0: 
+                    print(f'date: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: zero xmls found with videos, usually caused by an incomplete upload.')
+                
+                if xml_count != 0 and video_count == 0: 
+                    print(f'date: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: no videos found, usually cause by an incomplete upload.')
                 pbar.update(1)
 
-    return count_detect_files_array, count_xmls, zero_size_files, video_count, xml_count, date_list
+    return count_detect_files_array ,date_list
