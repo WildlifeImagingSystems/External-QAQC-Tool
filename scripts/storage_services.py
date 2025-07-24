@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 import os
 from pathlib import PurePath
-import json
+import sys
 
 from azure.storage.blob import ContainerClient
-from glob import glob
 
 AZURE_LOCAL_DIRECTORY = "temp_azure_storage/"
 
@@ -84,8 +83,12 @@ class AzureBlobStorageService(InputBase):
     """Azure Specific Method"""
     def get_azure_blob_storage_client(self, container_url, token):
         container_url_with_token = container_url + '?' + token
-        azure_blob_storage_client = ContainerClient.from_container_url(container_url_with_token)
-        return azure_blob_storage_client
+        try:
+            azure_blob_storage_client = ContainerClient.from_container_url(container_url_with_token)
+            return azure_blob_storage_client
+        except ValueError:
+            print("ERROR: Invalid container_url. Please check that the container_url is correct and then try again.")
+            sys.exit(1)
 
     def download_file(self, file_path):
         """Downloads a blob from the container."""
