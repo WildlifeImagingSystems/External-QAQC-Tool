@@ -25,7 +25,7 @@ def create_heatmap(count_detect_files_array, date_list, config, camera_ids):
 
     heatmap = px.imshow(
         heatmap_df,
-        labels=dict(x="Date", y="Camera ID", color="File Count"),
+        labels=dict(x="Camera Night", y="Camera ID", color="File Count"),
         aspect="auto",
         color_continuous_scale="Purples",
         zmin=0,
@@ -100,13 +100,13 @@ def create_video_timing_card(config):
                 xml_count = len(xml_list)
                 video_count = len(file_list)
                 if len(xml_list) != len(file_list):
-                    print(f'date: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: mismatched count of xmls and videos.')
+                    print(f'Camera Night: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: mismatched count of xmls and videos.')
 
                 if xml_count == 0 and video_count != 0: 
-                    print(f'date: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: zero xmls found with videos, usually caused by an incomplete upload.')
+                    print(f'Camera Night: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: zero xmls found with videos, usually caused by an incomplete upload.')
                 
                 if xml_count != 0 and video_count == 0: 
-                    print(f'date: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: no videos found, usually cause by an incomplete upload.')
+                    print(f'Camera Night: {date_list[ind_date]}, camera_id: {camera_id_list[ind_camera_id]}: no videos found, usually cause by an incomplete upload.')
                 pbar.update(1)
 
     return count_detect_files_array ,date_list
